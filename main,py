@@ -1,0 +1,144 @@
+# Import liberies
+import pygame
+import sys
+import random
+import time
+
+
+# Constants and variables
+WINDOW_SIZE = (650, 400)
+BALL_SIZE = 50
+BALL_SPEED = 1
+PLATFORM_SPEED = 8
+WHITE = (255, 255, 255)
+GREEN = (99, 210, 125)
+RED = (239, 62, 62)
+BLACK = (55, 55, 53)
+FPS = 50
+RADIUS_BALL = 10
+PLATFORM_X = 16
+PLATFORM_Y = 75
+
+x_ball = WINDOW_SIZE[0] // 2
+y_ball = WINDOW_SIZE[1] // 2
+
+platform_1_x = 0
+platform_1_y = 0
+platform_2_x = WINDOW_SIZE[0] - PLATFORM_X
+platform_2_y = 0
+
+poits_1 = 0
+poits_2 = 0
+
+
+# Initialization
+pygame.init()
+surface = pygame.display.set_mode(WINDOW_SIZE)
+pygame.display.set_caption('Ping pong')
+clock = pygame.time.Clock()
+surface.fill(BLACK)
+
+
+# Start flighting side
+flight_ball_x = random.randint(3, 7)
+flight_ball_y = random.randint(3, 7)
+
+if random.randint(0, 1) == 0:
+    flight_ball_x = -flight_ball_x
+else:
+    flight_ball_x = flight_ball_x
+
+if random.randint(0, 1) == 0:
+    flight_ball_y = -flight_ball_y
+else:
+    flight_ball_y = flight_ball_y
+
+
+# Updating
+pygame.display.update()
+
+
+# Main loop
+while True:
+
+    # Exit
+    for i in pygame.event.get():
+        if i.type == pygame.QUIT:
+            sys.exit()
+            
+            
+    # Buttons
+    keys = pygame.key.get_pressed()
+
+
+    # Moving platforms
+    if keys[pygame.K_w]:
+        if platform_1_y > 0:
+            platform_1_y = platform_1_y - PLATFORM_SPEED
+
+    if keys[pygame.K_s]:
+        if platform_1_y < WINDOW_SIZE[1] - PLATFORM_Y:
+            platform_1_y = platform_1_y + PLATFORM_SPEED
+
+    if keys[pygame.K_UP]:
+        if platform_2_y > 0:
+            platform_2_y = platform_2_y - PLATFORM_SPEED
+
+    if keys[pygame.K_DOWN]:
+        if platform_2_y < WINDOW_SIZE[1] - PLATFORM_Y:
+            platform_2_y = platform_2_y + PLATFORM_SPEED
+
+
+    # Spawn
+    pygame.draw.circle(surface, RED, (x_ball, y_ball), RADIUS_BALL)
+    pygame.draw.rect(surface, WHITE, (platform_1_x, platform_1_y, PLATFORM_X, PLATFORM_Y))
+    pygame.draw.rect(surface, WHITE, (platform_2_x, platform_2_y, PLATFORM_X, PLATFORM_Y))
+
+
+    # Move
+    x_ball = x_ball + flight_ball_x
+    y_ball = y_ball + flight_ball_y
+
+
+    # Collision UP
+    if y_ball - RADIUS_BALL < 0:
+        flight_ball_y = -flight_ball_y
+    
+    # Collision DOWN
+    if y_ball + RADIUS_BALL > WINDOW_SIZE[1]:
+        flight_ball_y = -flight_ball_y
+
+    # Collision LEFT
+    if x_ball - RADIUS_BALL < PLATFORM_X:
+        if y_ball > platform_1_y and y_ball < platform_1_y + PLATFORM_Y:
+            flight_ball_x = -flight_ball_x
+
+    # Collision RIGHT
+    if x_ball + RADIUS_BALL > WINDOW_SIZE[0] - PLATFORM_X:
+        if y_ball > platform_2_y and y_ball < platform_2_y + PLATFORM_Y:
+            flight_ball_x = -flight_ball_x
+        
+    
+    # Death
+    if x_ball + RADIUS_BALL > WINDOW_SIZE[0]:
+        x_ball = WINDOW_SIZE[0] // 2
+        y_ball = WINDOW_SIZE[1] // 2
+        poits_1 = poits_1 + 1
+        time.sleep(1)
+        
+
+    if x_ball - RADIUS_BALL < 0:
+        x_ball = WINDOW_SIZE[0] // 2
+        y_ball = WINDOW_SIZE[1] // 2
+        poits_2 = poits_2 + 1
+        time.sleep(1)
+    
+    
+    # Points
+    print(str(poits_1) + ' - ' + str(poits_2))
+    
+    
+    # Updating
+    pygame.display.update()
+    surface.fill(BLACK)
+    clock.tick(FPS)
